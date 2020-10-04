@@ -1,0 +1,26 @@
+{
+  "name": "lengbin/error-code",
+  "description": "php error code",
+  "type": "library",
+  "keywords": ["php", "extension", "error-code"],
+  "license": "MIT",
+  "require": {
+    "php": ">=7.2.0",
+    "lengbin/Common": "dev-master",
+    "lengbin/helper": "dev-master",
+    "roave/better-reflection": "^4.0",
+    "marc-mabe/php-enum": "^4.3"
+  },
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "Lengbin\\ErrorCode\\": "src"
+    }
+  },
+  "authors": [
+    {
+      "name": "lengbin",
+      "email": "xykxyk2008@163.com"
+    }
+  ]
+}
