@@ -6,7 +6,7 @@
   "license": "MIT",
   "require": {
     "php": ">=7.2.0",
-    "lengbin/Common": "dev-master",
+    "lengbin/common": "dev-master",
     "lengbin/helper": "dev-master",
     "roave/better-reflection": "^4.0",
     "marc-mabe/php-enum": "^4.3"
