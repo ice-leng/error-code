@@ -6,10 +6,9 @@
   "license": "MIT",
   "require": {
     "php": ">=7.2.0",
-    "lengbin/common": "dev-master",
-    "lengbin/helper": "dev-master",
     "roave/better-reflection": "^4.0",
-    "marc-mabe/php-enum": "^4.3"
+    "marc-mabe/php-enum": "^4.3",
+    "lengbin/helper": "dev-master"
   },
   "minimum-stability": "stable",
   "autoload": {
@@ -22,5 +21,11 @@
       "name": "lengbin",
       "email": "xykxyk2008@163.com"
     }
-  ]
+  ],
+  "repositories": {
+    "lengbin/helper": {
+      "type": "vcs",
+      "url": "https://github.com/ice-leng/helper.git"
+    }
+  }
 }
