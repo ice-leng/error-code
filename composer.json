@@ -8,7 +8,7 @@
     "php": ">=7.2.0",
     "roave/better-reflection": "^4.0",
     "marc-mabe/php-enum": "^4.3",
-    "lengbin/helper": "dev-master"
+    "lengbin/common": "dev-master"
   },
   "minimum-stability": "stable",
   "autoload": {
