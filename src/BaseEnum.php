@@ -48,4 +48,21 @@ class BaseEnum extends Enum implements Serializable
         return ArrayHelper::getValue($this->parse($constantDocComment), 'message', '');
     }
 
+    /**
+     * map
+     * @return array
+     */
+    public static function getMapJson()
+    {
+        $data = [];
+        $values = static::getValues();
+        foreach ($values as $value) {
+            $data[] = [
+                'key'  => $value,
+                'value' => static::byValue($value)->getMessage(),
+            ];
+        }
+        return $data;
+    }
+
 }
