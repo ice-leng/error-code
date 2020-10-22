@@ -38,9 +38,12 @@ class AbstractEnum extends Enum implements Serializable
 
     /**
      * 获得
+     *
+     * @param array $replace
+     *
      * @return string
      */
-    public function getMessage(): string
+    public function getMessage(array $replace = []): string
     {
         $className = get_called_class();
         $classInfo = (new BetterReflection())->classReflector()->reflect($className);
@@ -49,7 +52,8 @@ class AbstractEnum extends Enum implements Serializable
             return '';
         }
         $constantDocComment = $constant->getDocComment();
-        return ArrayHelper::getValue($this->parse($constantDocComment), 'message', '');
+        $message = ArrayHelper::getValue($this->parse($constantDocComment), 'message', '');
+        return strtr($message, $replace);
     }
 
     /**
