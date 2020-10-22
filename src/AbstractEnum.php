@@ -8,7 +8,7 @@ use MabeEnum\EnumSerializableTrait;
 use Roave\BetterReflection\BetterReflection;
 use Serializable;
 
-class BaseEnum extends Enum implements Serializable
+class AbstractEnum extends Enum implements Serializable
 {
     use EnumSerializableTrait;
 
@@ -44,7 +44,11 @@ class BaseEnum extends Enum implements Serializable
     {
         $className = get_called_class();
         $classInfo = (new BetterReflection())->classReflector()->reflect($className);
-        $constantDocComment = $classInfo->getReflectionConstant($this->getName())->getDocComment();
+        $constant = $classInfo->getReflectionConstant($this->getName());
+        if ($constant === null) {
+            return '';
+        }
+        $constantDocComment = $constant->getDocComment();
         return ArrayHelper::getValue($this->parse($constantDocComment), 'message', '');
     }
 
@@ -58,7 +62,7 @@ class BaseEnum extends Enum implements Serializable
         $values = static::getValues();
         foreach ($values as $value) {
             $data[] = [
-                'key'  => $value,
+                'key'   => $value,
                 'value' => static::byValue($value)->getMessage(),
             ];
         }

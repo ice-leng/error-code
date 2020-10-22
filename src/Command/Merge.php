@@ -2,14 +2,14 @@
 
 namespace Lengbin\ErrorCode\Command;
 
+use hanneskod\classtools\Iterator\ClassIterator;
 use Lengbin\Common\Component\BaseObject;
 use Lengbin\Helper\Util\FileHelper;
 use Lengbin\Helper\Util\TemplateHelper;
 use Lengbin\Helper\YiiSoft\Arrays\ArrayHelper;
 use Lengbin\Helper\YiiSoft\StringHelper;
 use Roave\BetterReflection\BetterReflection;
-use Roave\BetterReflection\Reflector\ClassReflector;
-use Roave\BetterReflection\SourceLocator\Type\DirectoriesSourceLocator;
+use Symfony\Component\Finder\Finder;
 
 class Merge extends BaseObject
 {
@@ -46,6 +46,11 @@ class Merge extends BaseObject
      * @var string
      */
     private $output;
+
+    /**
+     * @var string
+     */
+    private $stub;
 
     /**
      * @return array
@@ -150,12 +155,19 @@ class Merge extends BaseObject
         return $string;
     }
 
+
+    public function setStub(string $stub): Merge
+    {
+        $this->stub = $stub;
+        return $this;
+    }
+
     /**
      * @return string
      */
-    protected function getStub(): string
+    public function getStub(): string
     {
-        return __DIR__ . '/stubs/error-code.stub';
+        return  $this->stub ?? __DIR__ . '/stubs/error-code.stub';
     }
 
     /**
@@ -182,24 +194,21 @@ class Merge extends BaseObject
     {
         $data = [];
         $paths = $this->getPath();
-
-        $astLocator = (new BetterReflection())->astLocator();
         foreach ($paths as $path) {
-            $directoriesSourceLocator = new DirectoriesSourceLocator([$path], $astLocator);
-            $reflector = new ClassReflector($directoriesSourceLocator);
-            $classes = $reflector->getAllClasses();
-            foreach ($classes as $class) {
-                $prefix = $this->getPrefix($path, StringHelper::dirname($class->getFileName()));
-                $classInfo = (new BetterReflection())->classReflector()->reflect($class->getName());
+            $finder = new Finder();
+            $iter = new ClassIterator($finder->in($path));
+            foreach ($iter->getClassMap() as $classname => $splFileInfo) {
+                $prefix = $this->getPrefix($path, $splFileInfo->getPath());
+                $classInfo = (new BetterReflection())->classReflector()->reflect($classname);
                 $constants = $classInfo->getReflectionConstants();
                 foreach ($constants as $constant) {
-                    $name = implode('_', [$prefix, StringHelper::strtoupper(StringHelper::basename($class->getFileName(), '.php')), $constant->getName()]);
+                    $name = implode('_', [$prefix, $splFileInfo->getBasename('.php'), $constant->getName()]);
                     $data[] = implode(PHP_EOL . "   ", [
                         "    " . implode(PHP_EOL . "    ", explode(PHP_EOL, $constant->getDocComment())),
                         "const {$name} = '{$constant->getValue()}';",
                         '',
                     ]);
-                    $const = "{$class->getName()}::{$constant->getName()}";
+                    $const = "{$classname}::{$constant->getName()}";
                     if (ArrayHelper::isValidValue($this->constantValue, $constant->getValue())) {
                         throw new \RuntimeException("Constant {$this->constantValue[$constant->getValue()]} and {$const} value repeat");
                     }
@@ -207,7 +216,6 @@ class Merge extends BaseObject
                 }
             }
         }
-
         return $this->buildClass($data);
     }
 }

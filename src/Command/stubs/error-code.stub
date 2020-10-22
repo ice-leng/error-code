@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace %NAMESPACE%;
 
-use Lengbin\ErrorCode\BaseEnum;
+use Lengbin\ErrorCode\AbstractEnum;
 
-class %CLASSNAME% extends BaseEnum
+class %CLASSNAME% extends AbstractEnum
 {
 %CONSTANT%
 }

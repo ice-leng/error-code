@@ -25,9 +25,9 @@ declare(strict_types=1);
 
 namespace App\Constants\Error;
 
-use Lengbin\ErrorCode\BaseEnum;
+use Lengbin\ErrorCode\AbstractEnum;
 
-class ErrorCode extends BaseEnum
+class ErrorCode extends AbstractEnum
 {
     /**
      * @Message("成功")
