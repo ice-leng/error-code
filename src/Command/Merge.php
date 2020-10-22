@@ -202,7 +202,7 @@ class Merge extends BaseObject
                 $classInfo = (new BetterReflection())->classReflector()->reflect($classname);
                 $constants = $classInfo->getReflectionConstants();
                 foreach ($constants as $constant) {
-                    $name = implode('_', [$prefix, $splFileInfo->getBasename('.php'), $constant->getName()]);
+                    $name = implode('_', [$prefix, StringHelper::strtoupper($splFileInfo->getBasename('.php')), $constant->getName()]);
                     $data[] = implode(PHP_EOL . "   ", [
                         "    " . implode(PHP_EOL . "    ", explode(PHP_EOL, $constant->getDocComment())),
                         "const {$name} = '{$constant->getValue()}';",
