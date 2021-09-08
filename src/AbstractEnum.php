@@ -5,7 +5,7 @@ namespace Lengbin\ErrorCode;
 use Lengbin\Helper\YiiSoft\Arrays\ArrayHelper;
 use MabeEnum\Enum;
 use MabeEnum\EnumSerializableTrait;
-use Roave\BetterReflection\BetterReflection;
+use ReflectionClass;
 use Serializable;
 
 class AbstractEnum extends Enum implements Serializable
@@ -45,9 +45,9 @@ class AbstractEnum extends Enum implements Serializable
      */
     public function getMessage(array $replace = []): string
     {
-        $className = get_called_class();
-        $classInfo = (new BetterReflection())->classReflector()->reflect($className);
-        $constant = $classInfo->getReflectionConstant($this->getName());
+        $classname = get_called_class();
+        $class = new ReflectionClass($classname);
+        $constant = $class->getConstant($this->getName());
         if ($constant === null) {
             return '';
         }
