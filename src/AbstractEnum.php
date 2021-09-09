@@ -5,7 +5,7 @@ namespace Lengbin\ErrorCode;
 use Lengbin\Helper\YiiSoft\Arrays\ArrayHelper;
 use MabeEnum\Enum;
 use MabeEnum\EnumSerializableTrait;
-use ReflectionClass;
+use ReflectionClassConstant;
 use Serializable;
 
 class AbstractEnum extends Enum implements Serializable
@@ -46,8 +46,7 @@ class AbstractEnum extends Enum implements Serializable
     public function getMessage(array $replace = []): string
     {
         $classname = get_called_class();
-        $class = new ReflectionClass($classname);
-        $constant = $class->getConstant($this->getName());
+        $constant = new ReflectionClassConstant($classname, $this->getName());
         if ($constant === null) {
             return '';
         }
