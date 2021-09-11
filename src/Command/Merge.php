@@ -3,12 +3,14 @@
 namespace Lengbin\ErrorCode\Command;
 
 use hanneskod\classtools\Iterator\ClassIterator;
-use Lengbin\Common\Component\BaseObject;
+use Lengbin\Common\BaseObject;
 use Lengbin\Helper\Util\FileHelper;
 use Lengbin\Helper\Util\TemplateHelper;
 use Lengbin\Helper\YiiSoft\Arrays\ArrayHelper;
 use Lengbin\Helper\YiiSoft\StringHelper;
-use Roave\BetterReflection\BetterReflection;
+use ReflectionClass;
+use ReflectionClassConstant;
+use RuntimeException;
 use Symfony\Component\Finder\Finder;
 
 class Merge extends BaseObject
@@ -199,18 +201,19 @@ class Merge extends BaseObject
             $iter = new ClassIterator($finder->in($path));
             foreach ($iter->getClassMap() as $classname => $splFileInfo) {
                 $prefix = $this->getPrefix($path, $splFileInfo->getPath());
-                $classInfo = (new BetterReflection())->classReflector()->reflect($classname);
-                $constants = $classInfo->getReflectionConstants();
-                foreach ($constants as $constant) {
+                $class = new ReflectionClass($classname);
+                $constantNames = array_keys($class->getConstants());
+                foreach ($constantNames as $constantName) {
+                    $constant = new ReflectionClassConstant($classname, $constantName);
                     $name = implode('_', [$prefix, StringHelper::strtoupper($splFileInfo->getBasename('.php')), $constant->getName()]);
-                    $data[] = implode(PHP_EOL . "   ", [
-                        "    " . implode(PHP_EOL . "    ", explode(PHP_EOL, $constant->getDocComment())),
-                        "const {$name} = '{$constant->getValue()}';",
+                    $data[] = implode(PHP_EOL . "    ", [
+                        "    " . implode(PHP_EOL . "", explode(PHP_EOL, $constant->getDocComment())),
+                        "const {$name} = {$constant->getValue()};",
                         '',
                     ]);
                     $const = "{$classname}::{$constant->getName()}";
                     if (ArrayHelper::isValidValue($this->constantValue, $constant->getValue())) {
-                        throw new \RuntimeException("Constant {$this->constantValue[$constant->getValue()]} and {$const} value repeat");
+                        throw new RuntimeException("Constant {$this->constantValue[$constant->getValue()]} and {$const} value repeat");
                     }
                     $this->constantValue[$constant->getValue()] = $const;
                 }
