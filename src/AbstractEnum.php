@@ -65,8 +65,8 @@ class AbstractEnum extends Enum implements Serializable
         $values = static::getValues();
         foreach ($values as $value) {
             $data[] = [
-                'key'   => $value,
-                'value' => static::byValue($value)->getMessage(),
+                'value' => $value,
+                'text'  => static::byValue($value)->getMessage(),
             ];
         }
         return $data;
