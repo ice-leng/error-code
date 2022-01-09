@@ -157,7 +157,6 @@ class Merge extends BaseObject
         return $string;
     }
 
-
     public function setStub(string $stub): Merge
     {
         $this->stub = $stub;
@@ -169,7 +168,7 @@ class Merge extends BaseObject
      */
     public function getStub(): string
     {
-        return  $this->stub ?? __DIR__ . '/stubs/error-code.stub';
+        return $this->stub ?? __DIR__ . '/stubs/error-code.stub';
     }
 
     /**
@@ -206,9 +205,13 @@ class Merge extends BaseObject
                 foreach ($constantNames as $constantName) {
                     $constant = new ReflectionClassConstant($classname, $constantName);
                     $name = implode('_', [$prefix, StringHelper::strtoupper($splFileInfo->getBasename('.php')), $constant->getName()]);
+                    $constantValue = $constant->getValue();
+                    if (is_string($constantValue)) {
+                        $constantValue = '"' . $constantValue . '"';
+                    }
                     $data[] = implode(PHP_EOL . "    ", [
                         "    " . implode(PHP_EOL . "", explode(PHP_EOL, $constant->getDocComment())),
-                        "const {$name} = {$constant->getValue()};",
+                        "const {$name} = {$constantValue};",
                         '',
                     ]);
                     $const = "{$classname}::{$constant->getName()}";
