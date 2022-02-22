@@ -205,6 +205,7 @@ class Merge extends BaseObject
                 foreach ($constantNames as $constantName) {
                     $constant = new ReflectionClassConstant($classname, $constantName);
                     $name = implode('_', [$prefix, StringHelper::strtoupper($splFileInfo->getBasename('.php')), $constant->getName()]);
+
                     $constantValue = $constant->getValue();
                     if (is_string($constantValue)) {
                         $constantValue = '"' . $constantValue . '"';
