@@ -2,6 +2,7 @@
 
 namespace Lengbin\ErrorCode;
 
+use Lengbin\ErrorCode\Annotation\EnumMessage;
 use Lengbin\Helper\YiiSoft\Arrays\ArrayHelper;
 use MabeEnum\Enum;
 use MabeEnum\EnumSerializableTrait;
@@ -50,8 +51,19 @@ class AbstractEnum extends Enum implements Serializable
         if ($constant === null) {
             return '';
         }
-        $constantDocComment = $constant->getDocComment();
-        $message = ArrayHelper::getValue($this->parse($constantDocComment), 'message', '');
+
+        $message = '';
+        if (version_compare(PHP_VERSION,'8.0.0', '>')) {
+            $attributes = $constant->getAttributes(EnumMessage::class);
+            if (!empty($attributes)) {
+                $message = $attributes[0]->newInstance()->message;
+            }
+        }
+
+        if (empty($message)) {
+            $constantDocComment = $constant->getDocComment();
+            $message = ArrayHelper::getValue($this->parse($constantDocComment), 'message', '');
+        }
         return strtr($message, $replace);
     }
 
