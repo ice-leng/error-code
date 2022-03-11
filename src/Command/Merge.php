@@ -4,6 +4,7 @@ namespace Lengbin\ErrorCode\Command;
 
 use hanneskod\classtools\Iterator\ClassIterator;
 use Lengbin\Common\BaseObject;
+use Lengbin\ErrorCode\Annotation\EnumMessage;
 use Lengbin\Helper\Util\FileHelper;
 use Lengbin\Helper\Util\TemplateHelper;
 use Lengbin\Helper\YiiSoft\Arrays\ArrayHelper;
@@ -181,12 +182,16 @@ class Merge extends BaseObject
 
     /**
      * @param array $data
+     * @param bool  $hasEnumMessage
      *
      * @return bool|int
      */
-    protected function buildClass(array $data)
+    protected function buildClass(array $data, bool $hasEnumMessage)
     {
         $template = new TemplateHelper(file_get_contents($this->getStub()), "%", "%");
+        if ($hasEnumMessage) {
+            $template->place('USE', EnumMessage::class);
+        }
         $template->place('NAMESPACE', $this->getClassNamespace())->place('CLASSNAME', $this->getClassname())->place('CONSTANT', implode(PHP_EOL, $data));
         return FileHelper::putFile($this->generatePath(), $template->produce());
     }
@@ -195,6 +200,8 @@ class Merge extends BaseObject
     {
         $data = [];
         $paths = $this->getPath();
+        $hasEnumMessage = false;
+
         foreach ($paths as $path) {
             $finder = new Finder();
             $iter = new ClassIterator($finder->in($path));
@@ -203,18 +210,29 @@ class Merge extends BaseObject
                 $class = new ReflectionClass($classname);
                 $constantNames = array_keys($class->getConstants());
                 foreach ($constantNames as $constantName) {
+                    $docMessage = [];
                     $constant = new ReflectionClassConstant($classname, $constantName);
-                    $name = implode('_', [$prefix, StringHelper::strtoupper($splFileInfo->getBasename('.php')), $constant->getName()]);
 
+                    $docComment = $constant->getDocComment();
+                    if ($docComment) {
+                        $docMessage[] = "    " . implode(PHP_EOL . "", explode(PHP_EOL, $constant->getDocComment()));
+                    }
+                    if (version_compare(PHP_VERSION, '8.0.0', '>')) {
+                        $attributes = $constant->getAttributes(EnumMessage::class);
+                        if (!empty($attributes)) {
+                            $hasEnumMessage = true;
+                            $docMessage[] = ($docComment ? '' : '    ') . '#[EnumMessage("' . $attributes[0]->newInstance()->message . '")]';
+                        }
+                    }
+
+                    $name = implode('_', [$prefix, StringHelper::strtoupper($splFileInfo->getBasename('.php')), $constant->getName()]);
                     $constantValue = $constant->getValue();
                     if (is_string($constantValue)) {
                         $constantValue = '"' . $constantValue . '"';
                     }
-                    $data[] = implode(PHP_EOL . "    ", [
-                        "    " . implode(PHP_EOL . "", explode(PHP_EOL, $constant->getDocComment())),
-                        "const {$name} = {$constantValue};",
-                        '',
-                    ]);
+                    $docMessage[] = "const {$name} = {$constantValue};";
+                    $docMessage[] = '';
+                    $data[] = implode(PHP_EOL . "    ", $docMessage);
                     $const = "{$classname}::{$constant->getName()}";
                     if (ArrayHelper::isValidValue($this->constantValue, $constant->getValue())) {
                         throw new RuntimeException("Constant {$this->constantValue[$constant->getValue()]} and {$const} value repeat");
@@ -223,6 +241,6 @@ class Merge extends BaseObject
                 }
             }
         }
-        return $this->buildClass($data);
+        return $this->buildClass($data, $hasEnumMessage);
     }
 }
