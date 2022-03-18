@@ -5,6 +5,9 @@ namespace Lengbin\ErrorCode\Annotation;
 
 use Attribute;
 
+/**
+ * @Annotation
+ */
 #[Attribute(Attribute::TARGET_CLASS_CONSTANT)]
 class EnumMessage
 {
