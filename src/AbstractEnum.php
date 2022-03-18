@@ -6,6 +6,7 @@ use Lengbin\ErrorCode\Annotation\EnumMessage;
 use Lengbin\Helper\YiiSoft\Arrays\ArrayHelper;
 use MabeEnum\Enum;
 use MabeEnum\EnumSerializableTrait;
+use ReflectionClass;
 use ReflectionClassConstant;
 use Serializable;
 
@@ -37,23 +38,10 @@ class AbstractEnum extends Enum implements Serializable
         return $previous;
     }
 
-    /**
-     * 获得
-     *
-     * @param array $replace
-     *
-     * @return string
-     */
-    public function getMessage(array $replace = []): string
+    protected function handleMessage($constant, array $replace = [])
     {
-        $classname = get_called_class();
-        $constant = new ReflectionClassConstant($classname, $this->getName());
-        if ($constant === null) {
-            return '';
-        }
-
         $message = '';
-        if (version_compare(PHP_VERSION,'8.0.0', '>')) {
+        if (version_compare(PHP_VERSION, '8.0.0', '>')) {
             $attributes = $constant->getAttributes(EnumMessage::class);
             if (!empty($attributes)) {
                 $message = $attributes[0]->newInstance()->message;
@@ -68,6 +56,35 @@ class AbstractEnum extends Enum implements Serializable
     }
 
     /**
+     * 获得
+     *
+     * @param array $replace
+     *
+     * @return string
+     */
+    public function getMessage(array $replace = []): string
+    {
+        $classname = get_called_class();
+        $constant = new ReflectionClassConstant($classname, $this->getName());
+        if ($constant === null) {
+            return '';
+        }
+        return $this->handleMessage($constant, $replace);
+    }
+
+    public function getMessages(array $replace = []): array
+    {
+        $classname = get_called_class();
+        $reflect = new ReflectionClass($classname);
+        $constants = $reflect->getConstants();
+        $data = [];
+        foreach ($constants as $constant) {
+            $data[] = $this->handleMessage($constant, $replace);
+        }
+        return $data;
+    }
+
+    /**
      * map
      * @return array
      */
@@ -77,8 +94,8 @@ class AbstractEnum extends Enum implements Serializable
         $values = static::getValues();
         foreach ($values as $value) {
             $data[] = [
-                'value' => $value,
-                'text'  => static::byValue($value)->getMessage(),
+                'value'   => $value,
+                'message' => static::byValue($value)->getMessage(),
             ];
         }
         return $data;

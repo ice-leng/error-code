@@ -19,7 +19,8 @@ class EnumView
 {
     public const ENUM_NAME = 1;
     public const ENUM_VALUE = 2;
-    public const ENUM_ALL = 3;
+    public const ENUM_MESSAGE = 3;
+    public const ENUM_ALL = 4;
 
     public int $flags;
 
