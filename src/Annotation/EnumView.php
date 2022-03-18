@@ -17,14 +17,14 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class EnumView
 {
-    public const ENUM_MESSAGE = 1;
+    public const ENUM_NAME = 1;
     public const ENUM_VALUE = 2;
     public const ENUM_ALL = 3;
 
     public int $flags;
 
-    public function __construct(int $flags = self::ENUM_ALL)
+    public function __construct($flags)
     {
-        $this->flags = $flags;
+        $this->flags = $flags ?: self::ENUM_ALL;
     }
 }
