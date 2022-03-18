@@ -24,7 +24,7 @@ class EnumView
 
     public int $flags;
 
-    public function __construct($flags)
+    public function __construct($flags = null)
     {
         $this->flags = $flags ?: self::ENUM_ALL;
     }
