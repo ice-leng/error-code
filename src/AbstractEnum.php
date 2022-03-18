@@ -20,7 +20,7 @@ class AbstractEnum extends Enum implements Serializable
      *
      * @return array
      */
-    protected function parse(string $doc, array $previous = [])
+    protected static function parse(string $doc, array $previous = [])
     {
         $pattern = '/\\@(\\w+)\\(\\"(.+)\\"\\)/U';
         if (preg_match_all($pattern, $doc, $result)) {
@@ -38,7 +38,7 @@ class AbstractEnum extends Enum implements Serializable
         return $previous;
     }
 
-    protected function handleMessage($constant, array $replace = [])
+    protected static function handleMessage($constant, array $replace = [])
     {
         $message = '';
         if (version_compare(PHP_VERSION, '8.0.0', '>')) {
@@ -50,7 +50,7 @@ class AbstractEnum extends Enum implements Serializable
 
         if (empty($message)) {
             $constantDocComment = $constant->getDocComment();
-            $message = ArrayHelper::getValue($this->parse($constantDocComment), 'message', '');
+            $message = ArrayHelper::getValue(self::parse($constantDocComment), 'message', '');
         }
         return strtr($message, $replace);
     }
@@ -69,17 +69,17 @@ class AbstractEnum extends Enum implements Serializable
         if ($constant === null) {
             return '';
         }
-        return $this->handleMessage($constant, $replace);
+        return self::handleMessage($constant, $replace);
     }
 
-    public function getMessages(array $replace = []): array
+    public static function getMessages(array $replace = []): array
     {
         $classname = get_called_class();
         $reflect = new ReflectionClass($classname);
         $constants = $reflect->getConstants();
         $data = [];
         foreach ($constants as $constant) {
-            $data[] = $this->handleMessage($constant, $replace);
+            $data[] = self::handleMessage($constant, $replace);
         }
         return $data;
     }
