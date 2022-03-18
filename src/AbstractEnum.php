@@ -76,7 +76,7 @@ class AbstractEnum extends Enum implements Serializable
     {
         $classname = get_called_class();
         $reflect = new ReflectionClass($classname);
-        $constants = $reflect->getConstants();
+        $constants = $reflect->getReflectionConstants();
         $data = [];
         foreach ($constants as $constant) {
             $data[] = self::handleMessage($constant, $replace);
