@@ -189,9 +189,7 @@ class Merge extends BaseObject
     protected function buildClass(array $data, bool $hasEnumMessage)
     {
         $template = new TemplateHelper(file_get_contents($this->getStub()), "%", "%");
-        if ($hasEnumMessage) {
-            $template->place('USE', EnumMessage::class);
-        }
+        $template->place('USE', $hasEnumMessage ? ('use ' . EnumMessage::class . ';') : '');
         $template->place('NAMESPACE', $this->getClassNamespace())->place('CLASSNAME', $this->getClassname())->place('CONSTANT', implode(PHP_EOL, $data));
         return FileHelper::putFile($this->generatePath(), $template->produce());
     }
