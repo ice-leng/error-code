@@ -52,7 +52,15 @@ class AbstractEnum extends Enum implements Serializable
             $constantDocComment = $constant->getDocComment();
             $message = ArrayHelper::getValue(self::parse($constantDocComment), 'message', '');
         }
-        return strtr($message, $replace);
+
+        $arr = [];
+        foreach ($replace as $key => $value) {
+            if (!str_contains($key, ':')) {
+                $key = ":{$key}";
+            }
+            $arr[$key] = $value;
+        }
+        return strtr($message, $arr);
     }
 
     /**
